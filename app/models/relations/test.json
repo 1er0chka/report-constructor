@@ -1,0 +1,78 @@
+{
+  "event": {
+    "researchDate": "2023-04-24T06:33:06.436Z",
+    "shortDescription": "qeeffdfdf",
+    "status": "dfdfdf",
+    "reason": "",
+    "fullDescription": "dfdfdfdf",
+    "researcher": "",
+    "registrationDate": "2023-04-18T06:33:06.436Z",
+    "locationDate": null,
+    "startDate": "2023-04-18T06:33:06.436Z",
+    "endDate": "2023-04-18T06:33:06.436Z",
+    "PMNotificationDate":  "2023-04-18T06:33:06.436Z",
+    "defenceLine": "",
+    "infoSource": "",
+    "CPR": "",
+    "client": "",
+    "pureLoss": ""
+  },
+  "consequences": [
+    {
+      "summary": 994.76,
+      "currency": "",
+      "sumBYN": 0,
+      "sumRUB": 0,
+      "type": "",
+      "date":  "2023-04-18T06:33:06.436Z",
+      "analyticalCalculation": "",
+      "functionalBlock": "",
+      "processRegion": "",
+      "process": "",
+      "processStep": "",
+      "businessLine": "",
+      "riskSource": "",
+      "riskType": "",
+      "CPR": "",
+      "fullFormDeadline":  "2023-04-18T06:33:06.436Z",
+      "otherRiskConnection": []
+    }
+  ],
+    "repayments" : [
+      {
+        "consequenceId" : 0,
+        "repaymentSum": 0,
+        "currency": "",
+        "repaymentSumBYN": 0,
+        "repaymentSumRUB": 0,
+        "lossAfterRepaymentIorCurrency": 0,
+        "lossAfterRepaymentBYN": 0,
+        "type": "",
+        "typeGroup": "",
+        "repaymentDate": null,
+        "analyticalCalculation": ""
+      }
+  ],
+  "efforts": [
+    {
+      "description": "sdfggsdgdg",
+      "executor": "",
+      "initiator": "",
+      "realisationDate":  "2023-04-18T06:33:06.436Z",
+      "status": ""
+    }
+  ],
+  "reasons": [
+    {
+      "description": "gdfgdgf",
+      "classifier": "",
+      "type": "",
+      "orgStructure": "",
+      "functionalBlock": "",
+      "processRegion": "",
+      "process": "",
+      "processStep": "",
+      "operationRiskType": []
+    }
+  ]
+}
