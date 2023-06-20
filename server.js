@@ -11,7 +11,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 const db = require("./app/util/db");
-const models = require("./app/models/relations/relations")
+const models = require("./app/models/relations/relations");
 
 sequelize.sync()
     .then(() => {
@@ -20,3 +20,9 @@ sequelize.sync()
     .catch((err) => {
         console.log("Failed to sync db: " + err.message);
     });
+
+require("./app/routers/router")(app);
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}.`);
+})

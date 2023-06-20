@@ -4,5 +4,6 @@ module.exports = {
     USER: "postgres",
     PASSWORD: "2612",
     dialect: "postgres",
-    schema: "models"
+    schema: "models",
+    logging: false
 };
