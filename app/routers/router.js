@@ -5,9 +5,9 @@ module.exports = app => {
 
     router.get("/", service.getTableNames);
 
-    router.get("/col", service.getTableColumns);
+    router.get("/:tableName", service.getTableColumns);
 
-    router.get("/val", service.getColumnValues);
+    router.get("/:tableName/:columnName", service.getColumnValues);
 
     app.use("/report-create", router);
 }
