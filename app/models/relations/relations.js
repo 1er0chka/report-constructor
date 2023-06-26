@@ -37,7 +37,7 @@ Effort.belongsTo(Event)
 Event.hasMany(Consequence,{as: {plural: 'consequences', singular: 'consequence'}})
 Consequence.belongsTo(Event,{as: {plural: 'events', singular: 'event'}})
 
-Status.hasMany(Status)
+Status.hasMany(Event)
 Event.belongsTo(Status)
 
 Client.hasMany(Event)

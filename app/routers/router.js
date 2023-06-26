@@ -1,3 +1,4 @@
+const service = require("../services/service");
 module.exports = app => {
     const service = require("../services/service");
 
@@ -7,7 +8,7 @@ module.exports = app => {
 
     router.get("/:tableName", service.getTableColumns);
 
-    router.get("/:tableName/:columnName", service.getColumnValues);
+    router.post("/getTable/", service.getTableData);
 
     app.use("/report-create", router);
 }

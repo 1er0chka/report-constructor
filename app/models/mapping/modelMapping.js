@@ -22,4 +22,5 @@ module.exports = {
     riskType_dict: '../models/dictModels/riskType',
     sourceType_dict: '../models/dictModels/sourceType',
     status_dict: '../models/dictModels/status',
+    orgStructure_dict: '../models/dictModels/orgStructure'
 };
