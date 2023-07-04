@@ -1,13 +1,24 @@
 const db = require("../util/db");
 const modelMapping = require("../models/mapping/modelMapping");
 const e = require("express");
+const {event} = require("../models/mapping/modelMapping");
 const schemaName = require("../config/db.config").schema;
 
-exports.getTableData = (req, res) => {
+exports.getTableData = async (req, res) => {
     if (Object.keys(req.body.tables).length === 1) {
         getFirstTable(req.body.tables, res);
     } else {
-        makeQueryGetTables(req.body.tables, res)
+        const associations = getParentsWithChild(req.body.tables);
+        const first = getFirst(req.body.tables, associations);
+        let include = [];
+        include = generateIncludeNode(req.body.tables, first, associations, include);
+        /* по возможности 13-14 заменить на
+        * let include = generateIncludeNode(data, first, parentsWithChild, []);
+        * */
+        const table = await getTableData(first, include, req.body.tables);
+        const columnsWithValues = getColumnsWithValues(table);
+        console.log(columnsWithValues)
+        addAssociatedTablesToResponse(res, columnsWithValues, req.body.tables);
     }
 }
 
@@ -29,50 +40,87 @@ function getFirstTable(tableData, res) {
         });
 }
 
-function makeQueryGetTables(tableData, res) {
-    let query = `SELECT `;
-    let joinConditions = '';
-    for (const tableName in tableData) {
-        const columns = tableData[tableName];
-        query += columns.map(column => `${schemaName}."${tableName}"."${column}", `).join('');
-        if (Object.keys(tableData).length > 1) {
-            for (const prevTable in tableData) {
-                const hasField = getModel(tableName).rawAttributes.hasOwnProperty(convertToCamelCase(prevTable) + "Id");
-                if (hasField) {
-                    if (prevTable !== tableName) {
-                        let temp = joinConditions;
-                        joinConditions = `LEFT JOIN ${schemaName}."${prevTable}" ON ${schemaName}."${tableName}"."${convertToCamelCase(prevTable)}Id" = ${schemaName}."${prevTable}".id ` + temp;
-                    }
-                }
+function getParentsWithChild(data) {
+    // {родитель: дите}
+    let parentsWithChild = {};
+    // получение списка родителей - детей
+    for (const tableName in data) {
+        parentsWithChild[tableName] = (Object.keys(data).filter(otherTableName => {
+            return getModel(tableName).rawAttributes.hasOwnProperty(convertToCamelCase(otherTableName) + "Id")
+        }));
+    }
+    return parentsWithChild;
+}
+
+function getFirst(data, parentsWithChild) {
+    let first = null;
+    console.log(parentsWithChild)
+    for (const tableName in data) {
+        let isFirst = true;
+        // является ли "первым" = не должно быть родителей
+        Object.values(parentsWithChild).map(childs => {
+            if (childs.includes(tableName)) {
+                isFirst = false;
+            }
+        })
+        // если элемент без родителей
+        if (isFirst) {
+            // и при этом основная модель еще не выбрана
+            if (first === null) {
+                first = tableName;
+            } else {
+                // тогда сделать ребенка родителем
+                parentsWithChild[parentsWithChild[tableName][0]].push(tableName);
+                parentsWithChild[tableName].splice(0, 1);
             }
         }
     }
-    query = query.slice(0, -2);
-    for (const tableName in tableData) {
-        if (joinConditions.includes(`LEFT JOIN ${schemaName}."${tableName}`)) {
-            continue;
-        }
-        query += ` FROM ${schemaName}."${tableName}" ${joinConditions};`;
-        break;
-    }
-    console.log(query);
-    executeQuery(tableData, query, res);
+    return first;
 }
 
-async function executeQuery(tables, query, res) {
-    try {
-        const [results, metadata] = await db.query(query);
-        const result = {};
-        for (const key of Object.keys(results[0])) {
-            result[key] = results.map(obj => obj[key]);
+async function getTableData(first, include, data) {
+    return getModel(first).findAll({
+            raw: true,
+            include: include,
+            attributes: data[first],
         }
-        addAssociatedTablesToResponse(res, result, tables)
-    } catch (error) {
-        console.error('Error occurred during query execution:', error);
-        res.json({error: "Error occurred during query execution"});
-    }
+    ).then((result) => {
+        return result;
+    })
+    //return [];
 }
 
+function getColumnsWithValues(table) {
+    let columnsWithValues = {};
+    for (let row = 0; row < table.length; row++) {
+        for (let columnName in table[row]) {
+           // const newName = columnName.split('\.').pop();
+            const parts = columnName.split('.'); // Разделение строки по точкам
+            const newName = parts.length > 1 ? parts.slice(-2).join('.') : columnName; // Проверка количества частей и применение slice() только в случае, если есть две или более части
+
+            if (Object.keys(columnsWithValues).includes(newName)) {
+                columnsWithValues[newName].push(table[row][columnName]);
+            } else {
+                columnsWithValues[newName] = [table[row][columnName]];
+            }
+        }
+    }
+    console.log(columnsWithValues)
+    return columnsWithValues;
+}
+
+function generateIncludeNode(data, table, parentsWithChild, include) {
+    if (parentsWithChild[table] !== undefined) {
+        return include = parentsWithChild[table].map(child => {
+            return {
+                model: getModel(child),
+                raw: true,
+                attributes: data[child],
+                include: generateIncludeNode(data, child, parentsWithChild, include),
+            }
+        })
+    } else return [];
+}
 async function addAssociatedTablesToResponse(res, data, tables) {
     let allTables = [];
     await db.getQueryInterface().showAllTables({schema: schemaName})
@@ -161,4 +209,3 @@ function convertToCamelCase(str) {
     });
     return camelCaseParts.join('');
 }
-
